@@ -1,0 +1,11 @@
+# package directories
+node_modules
+
+# Serverless directories
+.serverless
+
+# AWS CREDS
+.envrc
+
+# IDE
+.idea
