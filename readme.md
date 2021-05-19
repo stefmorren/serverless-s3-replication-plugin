@@ -1,6 +1,6 @@
 # Serverless S3 replication plugin
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
-[![Coverage Status](https://raw.githubusercontent.com/stefmorren/serverless-s3-replication-plugin/main/coverage/badge.svg?branch=master)]
+![Coverage Status](https://raw.githubusercontent.com/stefmorren/serverless-s3-replication-plugin/main/coverage/badge.svg?branch=master)
 
 This is a serverless plugin to easily setup replications between AWS S3 buckets. The plugin allows you to set up single direction and/or bidirectional replication.
 
