@@ -1,6 +1,6 @@
 {
   "name": "serverless-s3-replication-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A plugin to setup replication across AWS S3 buckets",
   "scripts": {
     "test": "standard && jest \"--coverage\" && make-coverage-badge"
