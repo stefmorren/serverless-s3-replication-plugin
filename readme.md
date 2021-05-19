@@ -4,7 +4,7 @@
 
 This is a serverless plugin to easily setup replications between AWS S3 buckets. The plugin allows you to set up single direction and/or bidirectional replication.
 
-The plugin will wait until all buckets from the configuration exist. If they all succeed the plugin will modify the configured S3 buckets and add replication to them. Also, the required IAM roles will automatically be created for you. The IAM role follows the best practice to only have the permissions to resources it really needs. There will be an unique IAM role in each region.   
+The plugin will wait until all buckets from the configuration exist. If they all succeed, the plugin will modify the configured S3 buckets and add replication to them. Also, the required IAM roles will automatically be created for you. The IAM role follows the best practice to only have the permissions to resources it really needs. There will be a unique IAM role in each region.   
 
 ## Install
 `npm install --save-dev serverless-s3-replication-plugin`

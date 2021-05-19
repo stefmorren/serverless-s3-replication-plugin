@@ -5,6 +5,7 @@
   "scripts": {
     "test": "standard && jest \"--coverage\" && make-coverage-badge"
   },
+  "main": "src/index.js",
   "author": "Stef Morren",
   "license": "MIT",
   "dependencies": {
