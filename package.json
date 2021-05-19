@@ -12,6 +12,12 @@
     "type": "git",
     "url": "https://github.com/stefmorren/serverless-s3-replication-plugin.git"
   },
+  "keywords": [
+    "serverless",
+    "s3",
+    "replication",
+    "aws"
+  ],
   "dependencies": {
     "aws-sdk": "^2.889.0",
     "chalk": "^4.1.1"
