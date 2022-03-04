@@ -396,7 +396,10 @@ function createServerlessContext (singleDirection, bidirectional) {
       log: (str) => {
         console.log(str)
       }
-    }
+    },
+    getProvider: () => ({
+      getCredentials: () => {}
+    })
   }
 }
 
