@@ -104,7 +104,7 @@ async function createOrUpdateS3ReplicationRole (
   targetBucketConfigs,
   sourceRegion
 ) {
-  const iam = new aws.IAM()
+  const iam = new aws.IAM(getCredentials(serverless))
 
   const roleName = `${getServiceName(serverless)}-${sourceRegion}-s3-rep-role`
 
@@ -189,14 +189,14 @@ function getAssumeRolePolicyDocument () {
 }
 
 async function putBucketReplicationsForReplicationConfigMap (serverless, replicationConfigMap) {
-  const s3 = new aws.S3()
+  const s3 = new aws.S3(getCredentials(serverless))
 
   for (const sourceBucket of replicationConfigMap.keys()) {
     const sourceReplicationConfig = replicationConfigMap.get(sourceBucket)
     const s3BucketReplicationRequest = {
       Bucket: sourceBucket,
       ReplicationConfiguration: {
-        Role: `arn:aws:iam::${await getAccountId()}:role/${sourceReplicationConfig.role}`,
+        Role: `arn:aws:iam::${await getAccountId(serverless)}:role/${sourceReplicationConfig.role}`,
         Rules: sourceReplicationConfig.rules
       }
     }
@@ -267,13 +267,13 @@ async function allSpecifiedBucketsExist (serverless) {
 }
 
 async function validateBucketExists (serverless, bucketName) {
-  const s3 = new aws.S3()
+  const s3 = new aws.S3(getCredentials(serverless))
 
   try {
     await s3
       .headBucket({
         Bucket: bucketName,
-        ExpectedBucketOwner: `${await getAccountId()}`
+        ExpectedBucketOwner: `${await getAccountId(serverless)}`
       })
       .promise()
   } catch (e) {
