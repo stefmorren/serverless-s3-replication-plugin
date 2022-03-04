@@ -5,13 +5,8 @@ const S3_PREFIX = 'arn:aws:s3:::'
 const TAG = 'SLS-S3-REPLICATION-PLUGIN'
 const LOG_PREFIX = 'SLS-S3-REPLICATION-PLUGIN:'
 
-function getCredentials(serverless) {
-  const provider = serverless.getProvider("aws");
-  return Object.assign({}, provider.getCredentials(), { region: provider.region });
-}
-
-async function getAccountId (serverless) {
-  const sts = new aws.STS(getCredentials(serverless))
+async function getAccountId () {
+  const sts = new aws.STS()
   const identity = await sts.getCallerIdentity().promise()
   return identity.Account
 }
@@ -104,7 +99,7 @@ async function createOrUpdateS3ReplicationRole (
   targetBucketConfigs,
   sourceRegion
 ) {
-  const iam = new aws.IAM(getCredentials(serverless))
+  const iam = new aws.IAM()
 
   const roleName = `${getServiceName(serverless)}-${sourceRegion}-s3-rep-role`
 
@@ -189,14 +184,14 @@ function getAssumeRolePolicyDocument () {
 }
 
 async function putBucketReplicationsForReplicationConfigMap (serverless, replicationConfigMap) {
-  const s3 = new aws.S3(getCredentials(serverless))
+  const s3 = new aws.S3()
 
   for (const sourceBucket of replicationConfigMap.keys()) {
     const sourceReplicationConfig = replicationConfigMap.get(sourceBucket)
     const s3BucketReplicationRequest = {
       Bucket: sourceBucket,
       ReplicationConfiguration: {
-        Role: `arn:aws:iam::${await getAccountId(serverless)}:role/${sourceReplicationConfig.role}`,
+        Role: `arn:aws:iam::${await getAccountId()}:role/${sourceReplicationConfig.role}`,
         Rules: sourceReplicationConfig.rules
       }
     }
@@ -267,17 +262,17 @@ async function allSpecifiedBucketsExist (serverless) {
 }
 
 async function validateBucketExists (serverless, bucketName) {
-  const s3 = new aws.S3(getCredentials(serverless))
+  const s3 = new aws.S3()
 
   try {
     await s3
       .headBucket({
         Bucket: bucketName,
-        ExpectedBucketOwner: `${await getAccountId(serverless)}`
+        ExpectedBucketOwner: `${await getAccountId()}`
       })
       .promise()
   } catch (e) {
-    if (e.code === 'NotFound' || e.code === "BadRequest") {
+    if (e.code === 'NotFound') {
       serverless.cli.log(`${LOG_PREFIX} ${chalk.red(`Bucket ${bucketName} does not exist yet. Plugin will only be executed when all buckets exist`)}`)
 
       return false
