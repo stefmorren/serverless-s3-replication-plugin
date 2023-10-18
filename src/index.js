@@ -16,7 +16,8 @@ class S3ReplicationPlugin {
           type: 'object',
           properties: {
             singleDirectionReplication: { type: 'array' },
-            bidirectionalReplicationBuckets: { type: 'array' }
+            bidirectionalReplicationBuckets: { type: 'array' },
+            replicationRolePrefixOverride: { type: 'string' },
           }
         }
       },

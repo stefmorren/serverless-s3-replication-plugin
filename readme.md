@@ -63,3 +63,30 @@ custom:
       - eu-central-1: my-bucket-jlsadjklsd-eu-central-1
       - us-east-1: my-bucket-jlsadjklsd-us-east-1
 ```
+
+## Overriding the S3 Replication Role name
+The default value of the Replication Role is: `${serviceName}-${sourceRegion}-${sourceBucket}-s3-rep-role`. 
+In most cases this default value will work without issue. But if your `serviceName` or `sourceBucket` are long, the cloudformation stack will fail with an error similar to:
+
+```
+Error:
+ValidationError: 1 validation error detected: Value 'your-long-service-name-eu-west-1-your-long-s3-bucket-name-s3-rep-role' at 'roleName' failed to satisfy constraint: Member must have length less than or equal to 64
+```
+
+To resolve this issue, you can use the `replicationRolePrefixOverride` configuration to set a default prefix value, which will use the following format: `${replicationRolePrefixOverride}-${sourceRegion}-s3-rep-role`.
+
+```yaml
+custom:
+  s3ReplicationPlugin:
+    singleDirectionReplication:
+      - sourceBucket:
+          eu-west-1: my-bucket-jlsadjklsd-eu-west-1
+        targetBuckets:
+          - eu-west-2: my-bucket-jlsadjklsd-eu-west-2
+          - eu-west-1: my-bucket-jlsadjklsd-sec-eu-west-1
+    replicationRolePrefixOverride: "my-prefix"
+```
+
+This will result in the following replication role names:
+- `my-prefix-eu-west-1-s3-rep-role`
+- `my-prefix-eu-west-2-s3-rep-role`
