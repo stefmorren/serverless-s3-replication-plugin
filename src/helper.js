@@ -106,7 +106,7 @@ async function createOrUpdateS3ReplicationRole (
 ) {
   const iam = new aws.IAM(getCredentials(serverless))
 
-  const roleName = `${getServiceName(serverless)}-${sourceRegion}-${sourceBucket}-s3-rep-role`
+  const roleName = 'assume-role-for-s3-replication'
 
   const createRoleRequest = {
     RoleName: roleName,
