@@ -90,3 +90,19 @@ custom:
 This will result in the following replication role names:
 - `my-prefix-eu-west-1-s3-rep-role`
 - `my-prefix-eu-west-2-s3-rep-role`
+
+## Setting Replication Time Control
+The default value is disabled.
+To enable it, you can use the `withReplicationTimeControl` configuration, set it to true to enable replication time control.
+
+```yaml
+custom:
+  s3ReplicationPlugin:
+    singleDirectionReplication:
+      - sourceBucket:
+          eu-west-1: my-bucket-jlsadjklsd-eu-west-1
+        targetBuckets:
+          - eu-west-2: my-bucket-jlsadjklsd-eu-west-2
+          - eu-west-1: my-bucket-jlsadjklsd-sec-eu-west-1
+    withReplicationTimeControl: true
+```
