@@ -51,7 +51,7 @@ test('test single direction s3 replication', async () => {
           Status: 'Enabled'
         },
         Destination: {
-          Bucket: 'arn:aws:s3:::my-bucket-eu-west-2'
+          Bucket: 'arn:aws:s3:::my-bucket-eu-west-2',
         },
         Filter: {
           Prefix: ''
@@ -104,7 +104,7 @@ test('test single direction s3 replication', async () => {
 })
 
 test('test bidirectional s3 replication', async () => {
-  const replicationConfigMap = await helper.setupS3Replication(createServerlessContext(false, true))
+  const replicationConfigMap = await helper.setupS3Replication(createServerlessContext(false, true,))
 
   expect(replicationConfigMap.size).toBe(3)
 
@@ -379,16 +379,120 @@ test('test hybrid model of single direction and bidirectional s3 replication', a
 })
 
 test('test replication role with prefix override', async () => {
-  const prefix = "my-prefix"
+  const prefix = 'my-prefix'
   const replicationConfigMap = await helper.setupS3Replication(createServerlessContext(true, false, prefix))
 
   expect(replicationConfigMap.size).toBe(2)
 
-  expect(replicationConfigMap.get('my-bucket-eu-west-1').role).toEqual(`${prefix}-eu-west-1-s3-rep-role`);
-  expect(replicationConfigMap.get('my-bucket-eu-central-1').role).toEqual(`${prefix}-eu-central-1-s3-rep-role`);
-});
+  expect(replicationConfigMap.get('my-bucket-eu-west-1').role).toEqual(`${prefix}-eu-west-1-s3-rep-role`)
+  expect(replicationConfigMap.get('my-bucket-eu-central-1').role).toEqual(`${prefix}-eu-central-1-s3-rep-role`)
+})
 
-function createServerlessContext (singleDirection, bidirectional, replicationRolePrefixOverride) {
+test('test with replication time control', async () => {
+  const replicationConfigMap = await helper.setupS3Replication(createServerlessContext(true, false, undefined, true))
+
+  expect(replicationConfigMap.size).toBe(2)
+
+  expect(replicationConfigMap.get('my-bucket-eu-west-1')).toEqual({
+    region: 'eu-west-1',
+    role: 'TEST-SERVICE-eu-west-1-my-bucket-eu-west-1-s3-rep-role',
+    rules: [
+      {
+        DeleteMarkerReplication: {
+          Status: 'Enabled'
+        },
+        Destination: {
+          Bucket: 'arn:aws:s3:::my-bucket-eu-west-2',
+          Metrics: {
+            EventThreshold: {
+              Minutes: 15
+            },
+            Status: 'Enabled'
+          },
+          ReplicationTime: {
+            Status: 'Enabled',
+            Time: {
+              Minutes: 15
+            }
+          }
+
+        },
+        Filter: {
+          Prefix: ''
+        },
+        Priority: 0,
+        Status: 'Enabled'
+      },
+      {
+        DeleteMarkerReplication: {
+          Status: 'Enabled'
+        },
+        Destination: {
+          Bucket: 'arn:aws:s3:::my-bucket-sec-eu-west-1',
+          Metrics: {
+            EventThreshold: {
+              Minutes: 15
+            },
+            Status: 'Enabled'
+          },
+          ReplicationTime: {
+            Status: 'Enabled',
+            Time: {
+              Minutes: 15
+            }
+          }
+        },
+        Filter: {
+          Prefix: ''
+        },
+        Priority: 1,
+        Status: 'Enabled'
+      }
+    ],
+    targetBucketConfigs: [
+      { 'eu-west-2': 'my-bucket-eu-west-2' },
+      { 'eu-west-1': 'my-bucket-sec-eu-west-1' }
+    ]
+  })
+
+  expect(replicationConfigMap.get('my-bucket-eu-central-1')).toEqual({
+    region: 'eu-central-1',
+    role: 'TEST-SERVICE-eu-central-1-my-bucket-eu-central-1-s3-rep-role',
+    rules: [
+      {
+        DeleteMarkerReplication: {
+          Status: 'Enabled'
+        },
+        Destination: {
+          Bucket: 'arn:aws:s3:::my-bucket-us-east-2',
+          Metrics: {
+            EventThreshold: {
+              Minutes: 15
+            },
+            Status: 'Enabled'
+          },
+          ReplicationTime: {
+            Status: 'Enabled',
+            Time: {
+              Minutes: 15
+            }
+          }
+        },
+        Filter: {
+          Prefix: ''
+        },
+        Priority: 0,
+        Status: 'Enabled'
+      }
+    ],
+    targetBucketConfigs: [
+      { 'us-east-2': 'my-bucket-us-east-2' }
+    ]
+  })
+
+})
+
+function createServerlessContext (singleDirection, bidirectional, replicationRolePrefixOverride, withReplicationTimeControl) {
   return {
     service: {
       provider: {
@@ -399,7 +503,8 @@ function createServerlessContext (singleDirection, bidirectional, replicationRol
         s3ReplicationPlugin: {
           singleDirectionReplication: singleDirection ? createSingleDirectionReplicationConfig() : undefined,
           bidirectionalReplicationBuckets: bidirectional ? createBidirectionalReplicationConfig() : undefined,
-          replicationRolePrefixOverride
+          replicationRolePrefixOverride,
+          withReplicationTimeControl
         }
       }
     },
