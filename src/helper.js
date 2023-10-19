@@ -4,7 +4,7 @@ const aws = require('aws-sdk')
 const S3_PREFIX = 'arn:aws:s3:::'
 const TAG = 'SLS-S3-REPLICATION-PLUGIN'
 const LOG_PREFIX = 'SLS-S3-REPLICATION-PLUGIN:'
-const REPLICATION_ROLE_SUFFIX = "s3-rep-role";
+const REPLICATION_ROLE_SUFFIX = 's3-rep-role'
 
 function getCredentials (serverless) {
   const provider = serverless.getProvider('aws')
@@ -110,7 +110,7 @@ async function createOrUpdateS3ReplicationRole (
   const defaultRoleName = `${getServiceName(serverless)}-${sourceRegion}-${sourceBucket}-${REPLICATION_ROLE_SUFFIX}`
   const prefixOverride = serverless.service.custom.s3ReplicationPlugin.replicationRolePrefixOverride
   const roleName = prefixOverride ? `${prefixOverride}-${sourceRegion}-${REPLICATION_ROLE_SUFFIX}` : defaultRoleName
-  
+
   const createRoleRequest = {
     RoleName: roleName,
     AssumeRolePolicyDocument: getAssumeRolePolicyDocument(),
@@ -225,7 +225,8 @@ function createS3RulesForBucket (serverless, sourceBucket, targetBucketConfigs, 
     const targetBucket = getBucketName(targetBucketConfig)
     rules.push({
       Destination: {
-        Bucket: `${S3_PREFIX}${targetBucket}`
+        Bucket: `${S3_PREFIX}${targetBucket}`,
+        ...getReplicationTimeControl(serverless)
       },
       Status: 'Enabled',
       Priority: counter,
@@ -242,6 +243,23 @@ function createS3RulesForBucket (serverless, sourceBucket, targetBucketConfigs, 
     serverless.cli.log(`${LOG_PREFIX} Creating replication rule between ${chalk.green(sourceBucket)} and ${chalk.green(targetBucket)} S3 buckets`)
   }
   return rules
+}
+
+function getReplicationTimeControl (serverless) {
+  return serverless.service.custom.s3ReplicationPlugin.withReplicationTimeControl ? {
+    Metrics: {
+      EventThreshold: {
+        Minutes: 15
+      },
+      Status: 'Enabled'
+    },
+    ReplicationTime: {
+      Status: 'Enabled',
+      Time: {
+        Minutes: 15
+      }
+    }
+  } : {}
 }
 
 async function allSpecifiedBucketsExist (serverless) {
