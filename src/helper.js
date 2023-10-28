@@ -4,7 +4,7 @@ const aws = require('aws-sdk')
 const S3_PREFIX = 'arn:aws:s3:::'
 const TAG = 'SLS-S3-REPLICATION-PLUGIN'
 const LOG_PREFIX = 'SLS-S3-REPLICATION-PLUGIN:'
-const REPLICATION_ROLE_SUFFIX = "s3-rep-role";
+const REPLICATION_ROLE_SUFFIX = 's3-rep-role'
 
 function getCredentials (serverless) {
   const provider = serverless.getProvider('aws')
@@ -110,7 +110,6 @@ async function createOrUpdateS3ReplicationRole (
   const defaultRoleName = `${getServiceName(serverless)}-${sourceRegion}-${sourceBucket}-${REPLICATION_ROLE_SUFFIX}`
   const prefixOverride = serverless.service.custom.s3ReplicationPlugin.replicationRolePrefixOverride
   const roleName = prefixOverride ? `${prefixOverride}-${sourceRegion}-${REPLICATION_ROLE_SUFFIX}` : defaultRoleName
-  
   const createRoleRequest = {
     RoleName: roleName,
     AssumeRolePolicyDocument: getAssumeRolePolicyDocument(),
